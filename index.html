@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快点新闻-国际时事,时政要闻,国际热点,新闻人物,国际博览,评论分析,外媒关注,媒体聚焦</title>
+    <meta name=keywords content="国际时事,时政要闻,国际热点,新闻人物,国际博览,评论分析,外媒关注,媒体聚焦">
+<meta name=description content="快点新闻-国际时事,时政要闻,国际热点,新闻人物,国际博览,评论分析,外媒关注,媒体聚焦">
+    <link href="https://cdn.jsdmirror.com/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7fafc;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">快点新闻</h1>
+        <div class="mb-4">
+            <label for="language" class="block mb-2">选择语言:</label>
+            <select id="language" class="border p-2">
+                <option value="zh">中文</option>
+                <option value="en">英语</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="category" class="block mb-2">选择分类:</label>
+            <select id="category" class="border p-2">
+                <option value="general">综合</option>
+                <option value="world">世界</option>
+                <option value="nation">国家</option>
+                <option value="business">商业</option>
+                <option value="technology">技术</option>
+                <option value="entertainment">娱乐</option>
+                <option value="sports">体育</option>
+                <option value="science">科学</option>
+                <option value="health">健康</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="search" class="block mb-2">搜索新闻:</label>
+            <input id="search" type="text" class="border p-2 w-full" placeholder="输入搜索关键词...">
+        </div>
+        <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+    <script>
+        const API_KEY = 'a6ec55d716fd3d21c7280c89985206da';
+        const API_URL = 'https://gnews.io/api/v4/top-headlines';
+        const pageSize = 10; // 每页显示的新闻数量
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const languageSelect = document.getElementById('language');
+            const categorySelect = document.getElementById('category');
+            const searchInput = document.getElementById('search');
+
+            languageSelect.addEventListener('change', fetchNews);
+            categorySelect.addEventListener('change', fetchNews);
+            searchInput.addEventListener('input', fetchNews); // 实时搜索
+
+            fetchNews();
+        });
+
+        function fetchNews() {
+            const language = document.getElementById('language').value;
+            const category = document.getElementById('category').value;
+            const query = document.getElementById('search').value.trim();
+
+            const url = new URL(API_URL);
+            url.searchParams.append('lang', language);
+            url.searchParams.append('topic', category);
+            url.searchParams.append('q', query); // 搜索关键词
+            url.searchParams.append('max', pageSize);
+            url.searchParams.append('token', API_KEY);
+
+            console.log('Fetching news:', url.toString()); // 调试日志
+
+            fetch(url.toString())
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched news data:', data); // 调试日志
+                    displayNews(data.articles);
+                })
+                .catch(error => console.error('Error fetching news:', error));
+        }
+
+        function displayNews(articles) {
+            const newsContainer = document.getElementById('news-container');
+            newsContainer.innerHTML = '';
+
+            if (articles.length === 0) {
+                newsContainer.innerHTML = '<p>没有找到相关新闻。</p>';
+                return;
+            }
+
+            articles.forEach(article => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'bg-white p-4 rounded shadow';
+
+                const newsTitle = document.createElement('h2');
+                newsTitle.className = 'text-xl font-bold mb-2';
+                newsTitle.textContent = article.title;
+
+                const newsDescription = document.createElement('p');
+                newsDescription.className = 'text-gray-700 mb-4';
+                newsDescription.textContent = article.description;
+
+                const newsLink = document.createElement('a');
+                newsLink.className = 'text-blue-500 hover:underline';
+                newsLink.href = article.url;
+                newsLink.target = '_blank';
+                newsLink.textContent = '阅读更多';
+
+                newsItem.appendChild(newsTitle);
+                newsItem.appendChild(newsDescription);
+                newsItem.appendChild(newsLink);
+
+                newsContainer.appendChild(newsItem);
+            });
+        }
+    </script>
+</body>
+</html>
